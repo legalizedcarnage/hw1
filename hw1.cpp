@@ -141,6 +141,7 @@ int main(void)
 		glXSwapBuffers(dpy, win);
 	}
 	cleanupXWindows();
+	cleanup_fonts();
 	return 0;
 }
 
@@ -195,8 +196,15 @@ void init_opengl(void)
 	glMatrixMode(GL_MODELVIEW); glLoadIdentity();
 	//Set 2D mode (no perspective)
 	glOrtho(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT, -1, 1);
+	
+	glDisable(GL_LIGHTING);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_FOG);
+	glDisable(GL_CULL_FACE);
 	//Set the screen background color
 	glClearColor(0.1, 0.1, 0.1, 1.0);
+	glEnable(GL_TEXTURE_2D);
+	initialize_fonts();
 }
 
 void makeParticle(Game *game, int x, int y) {
@@ -210,7 +218,7 @@ void makeParticle(Game *game, int x, int y) {
 	p->s.center.y = y;
 	int r = -(rand() % 4) + 1;
 	p->velocity.y = r;
-	int z = rand() % 2 + 1;
+	int z = rand() % 10 + 1;
 	p->velocity.x =  z;
 	game->n++;
 }
@@ -270,7 +278,7 @@ void movement(Game *game)
 
 	if (game->n <= 0)
 		return;
-	
+
 	for (int i=0; i<game->n; i++) {
 		p = &game->particle[i];
 		p->s.center.x += p->velocity.x;
@@ -284,13 +292,15 @@ void movement(Game *game)
 		Shape *s;
 		s = &game->box;
 		if ((p->s.center.y > s->center.y - (s->height/2.0)) && 
-		(p->s.center.x > s->center.x - (s->width)))
+		(p->s.center.x > s->center.x - (s->width))) {
 			if ((p->s.center.y <= s->center.y + (s->height/2.0)) && 
-			(p->s.center.x <= s->center.x + (s->width)))
+			(p->s.center.x <= s->center.x + (s->width))) {
 				p->velocity.y *= bounce;
 				if (p->velocity.x > 1) {
 					p->velocity.x *= .9;
 				}
+			}
+		}
 		 s = &game->box2;
         	if ((p->s.center.y > s->center.y - (s->height/2.0)) &&
         	(p->s.center.x > s->center.x - (s->width)))
@@ -340,8 +350,8 @@ void movement(Game *game)
 void render(Game *game)
 {
 	makeParticle(game,120,540);
-
-    	float w, h;
+	makeParticle(game,123,540);
+	float w, h;
 	glClear(GL_COLOR_BUFFER_BIT);
 	//Draw shapes...
 
@@ -416,6 +426,35 @@ void render(Game *game)
 		glVertex2i( w,-h);
 	glEnd();
 	glPopMatrix();
+
+
+	Rect r[5];
+//	glClear(GL_COLOR_BUFFER_BIT);
+	//
+	r[0].bot = 495;
+	r[0].left = 95;
+	r[0].center = 0;
+	ggprint8b(&r[0], 16, 0x00ff0000, "REQUIREMENTS");
+	
+	r[1].bot = 445;
+	r[1].left = 200;
+	r[1].center = 0;
+	ggprint8b(&r[1], 16, 0x00ffff00, "DESIGN");
+	
+	r[2].bot = 395;
+	r[2].left = 275;
+	r[2].center = 0;
+	ggprint8b(&r[2], 16, 0x00ffff00, "IMPLEMENTATION");
+	
+	r[3].bot = 345;
+	r[3].left = 385;
+	r[3].center = 0;
+	ggprint8b(&r[3], 16, 0x00ffff00, "VERIFICATION");
+	
+	r[4].bot = 295;
+	r[4].left = 485;
+	r[4].center = 0;
+	ggprint8b(&r[4], 16, 0x00ffff00, "MAINTENANCE");
 	
 	//draw all particles here
 	glPushMatrix();
