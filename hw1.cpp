@@ -37,7 +37,9 @@
 
 //#include "log.h"
 //#include "ppm.h"
-//#include "fonts.h"
+extern "C" {
+    	#include "fonts.h"
+}
 
 #define WINDOW_WIDTH  800
 #define WINDOW_HEIGHT 600
@@ -90,7 +92,8 @@ void render(Game *game);
 
 int main(void)
 {
-	int done=0;
+	srand (time(NULL));
+    	int done=0;
 	srand(time(NULL));
 	initXWindows();
 	init_opengl();
@@ -201,11 +204,14 @@ void makeParticle(Game *game, int x, int y) {
 		return;
 	std::cout << "makeParticle() " << x << " " << y << std::endl;
 	//position of particle
+	
 	Particle *p = &game->particle[game->n];
 	p->s.center.x = x;
 	p->s.center.y = y;
-	p->velocity.y = -4.0;
-	p->velocity.x =  1.0;
+	int r = -(rand() % 4) + 1;
+	p->velocity.y = r;
+	int z = rand() % 2 + 1;
+	p->velocity.x =  z;
 	game->n++;
 }
 
@@ -252,7 +258,7 @@ int check_keys(XEvent *e, Game *game)
 		}
 		//You may check other keys here.
 		if (key == XK_B) {
-			makeParticle(game,120,300);
+			makeParticle(game,120,540);
 		}
 	}
 	return 0;
@@ -271,16 +277,17 @@ void movement(Game *game)
 		p->s.center.y += p->velocity.y;
 	
 		//gravity
-		p->velocity.y -= 0.5;	
+		p->velocity.y -= 0.2;	
 	
 		//check for collision with shapes...
+		double bounce = -.5;
 		Shape *s;
 		s = &game->box;
 		if ((p->s.center.y > s->center.y - (s->height/2.0)) && 
 		(p->s.center.x > s->center.x - (s->width)))
 			if ((p->s.center.y <= s->center.y + (s->height/2.0)) && 
 			(p->s.center.x <= s->center.x + (s->width)))
-				p->velocity.y *= -.8;
+				p->velocity.y *= bounce;
 				if (p->velocity.x > 1) {
 					p->velocity.x *= .9;
 				}
@@ -289,7 +296,7 @@ void movement(Game *game)
         	(p->s.center.x > s->center.x - (s->width)))
         		if ((p->s.center.y <= s->center.y + (s->height/2.0)) &&
             		(p->s.center.x <= s->center.x + (s->width)))
-        	  		p->velocity.y *= -.8;
+        	  		p->velocity.y *= bounce;
         	 		if (p->velocity.x > 1) {
         	     			p->velocity.x *= .9;
         			}
@@ -298,7 +305,7 @@ void movement(Game *game)
 		(p->s.center.x > s->center.x - (s->width)))
             		if ((p->s.center.y <= s->center.y + (s->height/2.0)) &&
             		(p->s.center.x <= s->center.x + (s->width)))
-                		p->velocity.y *= -.8;
+                		p->velocity.y *= bounce;
                 		if (p->velocity.x > 1) {
                     			p->velocity.x *= .9;
                 		}
@@ -307,7 +314,7 @@ void movement(Game *game)
         	(p->s.center.x > s->center.x - (s->width)))
             		if ((p->s.center.y <= s->center.y + (s->height/2.0)) &&
             		(p->s.center.x <= s->center.x + (s->width)))
-                		p->velocity.y *= -.8;
+                		p->velocity.y *= bounce;
                 		if (p->velocity.x > 1) {
                     			p->velocity.x *= .9;
         			}
@@ -316,7 +323,7 @@ void movement(Game *game)
         	(p->s.center.x > s->center.x - (s->width)))
             		if ((p->s.center.y <= s->center.y + (s->height/2.0)) &&
             		(p->s.center.x <= s->center.x + (s->width)))
-                		p->velocity.y *= -.8;
+                		p->velocity.y *= bounce;
                 		if (p->velocity.x > 1) {
                     			p->velocity.x *= .9;
                 		}
@@ -332,7 +339,9 @@ void movement(Game *game)
 
 void render(Game *game)
 {
-	float w, h;
+	makeParticle(game,120,540);
+
+    	float w, h;
 	glClear(GL_COLOR_BUFFER_BIT);
 	//Draw shapes...
 
@@ -410,9 +419,29 @@ void render(Game *game)
 	
 	//draw all particles here
 	glPushMatrix();
-	glColor3ub(150,160,220);
+	/*if (color ==1)
+		glColor3ub(100,100,250);
+	else if (color == 2)
+		glColor3ub(50,50,220);
+	else if (color == 3)
+		glColor3ub(0,0,220);
+	else if (color == 4)
+		glColor3ub(50,100,250);
+	else
+		glColor3ub(50,50,220);
+    		*/	    
 	for (int i=0; i<game->n; i++) {
-		makeParticle(game,120,300);
+		int color = rand() % 5;
+		if (color ==1)
+			glColor3ub(200,200,250);
+		else if (color == 2)
+			glColor3ub(160,160,250);
+		else if (color == 3)
+			glColor3ub(150,150,250);
+		else if (color == 4)
+			glColor3ub(180,180,250);
+		else
+			glColor3ub(150,150,250);
 		Vec *c = &game->particle[i].s.center;
 		w = 2;
 		h = 2;
